@@ -1,0 +1,86 @@
+
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Log masuk</title>
+<style>
+:root{--bg:#f3f6f5;--card:#fff;--text:#14302c;--muted:#5d726e;--line:#cfdad7;--accent:#0f6b5c;--accent-h:#0b564a;--err:#b3261e;--side:#0f6b5c;--sidetext:#e8f4f1;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1816;--card:#16231f;--text:#e6f1ee;--muted:#9bb2ad;--line:#2b3d38;--accent:#3fb59f;--accent-h:#58c9b3;--err:#ff8a80;--side:#12342d;--sidetext:#d6ece7}}
+:root[data-theme="dark"]{--bg:#0e1816;--card:#16231f;--text:#e6f1ee;--muted:#9bb2ad;--line:#2b3d38;--accent:#3fb59f;--accent-h:#58c9b3;--err:#ff8a80;--side:#12342d;--sidetext:#d6ece7}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:grid;grid-template-columns:1fr 1fr;background:var(--bg);color:var(--text);font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+.side{background:var(--side);color:var(--sidetext);display:flex;align-items:flex-end;padding:48px}
+.side h2{font-size:2rem;line-height:1.2;margin:0;max-width:16ch;font-weight:600}
+main{display:flex;align-items:center;justify-content:center;padding:24px}
+form{width:100%;max-width:380px;background:var(--card);padding:32px;border-radius:12px;border:1px solid var(--line)}
+h1{margin:0 0 4px;font-size:1.6rem}
+.sub{margin:0 0 24px;color:var(--muted)}
+label{display:block;font-weight:600;margin:16px 0 6px;font-size:.95rem}
+input[type=email],input[type=password],input[type=text]{width:100%;padding:12px;border:1px solid var(--line);border-radius:8px;font:inherit;background:transparent;color:var(--text)}
+input:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.pw{position:relative}
+.pw button{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--muted);cursor:pointer;padding:8px;font:inherit;font-size:.85rem}
+.err{color:var(--err);font-size:.85rem;min-height:1.2em;margin-top:4px}
+.row{display:flex;justify-content:space-between;align-items:center;margin:16px 0 20px;font-size:.9rem}
+.row label{display:flex;gap:8px;align-items:center;font-weight:400;margin:0}
+.row a{color:var(--accent)}
+.go{width:100%;padding:13px;border:0;border-radius:8px;background:var(--accent);color:#fff;font:inherit;font-weight:600;cursor:pointer}
+:root[data-theme="dark"] .go,:root:not([data-theme="light"]) .go{color:#06211c}
+.go:hover{background:var(--accent-h)}
+.msg{margin-top:16px;padding:12px;border-radius:8px;font-size:.9rem;display:none}
+.msg.ok{display:block;background:rgba(15,107,92,.12);color:var(--text)}
+.msg.bad{display:block;background:rgba(179,38,30,.12);color:var(--err)}
+@media (max-width:760px){body{grid-template-columns:1fr}.side{display:none}}
+</style>
+</head>
+<body>
+<section class="side"><h2>Selamat kembali. Teruskan di mana anda berhenti.</h2></section>
+<main>
+<form id="f" novalidate>
+<h1>Log masuk</h1>
+<p class="sub">Masukkan e-mel dan kata laluan anda.</p>
+
+<label for="email">E-mel</label>
+<input id="email" type="email" autocomplete="email" placeholder="nama@contoh.com">
+<div class="err" id="e1"></div>
+
+<label for="pass">Kata laluan</label>
+<div class="pw">
+<input id="pass" type="password" autocomplete="current-password">
+<button type="button" id="tg" aria-label="Tunjuk kata laluan">Tunjuk</button>
+</div>
+<div class="err" id="e2"></div>
+
+<div class="row">
+<label><input type="checkbox" id="rem"> Ingat saya</label>
+<a href="#">Lupa kata laluan?</a>
+</div>
+
+<button class="go" type="submit">Log masuk</button>
+<div class="msg" id="msg" role="status"></div>
+</form>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const email=$('email'),pass=$('pass'),msg=$('msg');
+try{const s=localStorage.getItem('email');if(s){email.value=s;$('rem').checked=true}}catch(e){}
+$('tg').onclick=()=>{const h=pass.type==='password';pass.type=h?'text':'password';$('tg').textContent=h?'Sembunyi':'Tunjuk'};
+$('f').addEventListener('submit',e=>{
+e.preventDefault();msg.className='msg';
+let ok=true;
+$('e1').textContent='';$('e2').textContent='';
+if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)){$('e1').textContent='Masukkan alamat e-mel yang sah.';ok=false}
+if(pass.value.length<6){$('e2').textContent='Kata laluan mesti sekurang-kurangnya 6 aksara.';ok=false}
+if(!ok)return;
+try{if($('rem').checked)localStorage.setItem('email',email.value);else localStorage.removeItem('email')}catch(e){}
+/* Demo sahaja: gantikan dengan panggilan ke backend/Supabase anda */
+if(email.value==='demo@contoh.com'&&pass.value==='123456'){msg.className='msg ok';msg.textContent='Log masuk berjaya.'}
+else{msg.className='msg bad';msg.textContent='E-mel atau kata laluan tidak betul.'}
+});
+</script>
+</body>
+</html>
